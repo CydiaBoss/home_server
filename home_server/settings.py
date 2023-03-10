@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     # Custom Apps
-    'photo',
+    'common',
+    'media',
 ]
 
 MIDDLEWARE = [
@@ -128,3 +129,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Media Root
+# https://docs.djangoproject.com/en/4.1/ref/settings/#std-setting-MEDIA_ROOT
+
+MEDIA_ROOT = ""
