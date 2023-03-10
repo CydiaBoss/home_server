@@ -1,0 +1,3 @@
+DEFAULT_DIRECTORY = "medias"
+PHOTO_DIRECTORY = "photos"
+VIDEO_DIRECTORY = "videos"

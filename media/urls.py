@@ -16,8 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
-from .views import PhotoView
+from .views import MediaView
 
 urlpatterns = [
-    path('test/', PhotoView.as_view()),
+    path('test/', MediaView.as_view()),
 ]
