@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     # Custom Apps
     'common',
     'media',
+    'youtube',
 ]
 
 MIDDLEWARE = [
@@ -133,4 +134,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Media Root
 # https://docs.djangoproject.com/en/4.1/ref/settings/#std-setting-MEDIA_ROOT
 
-MEDIA_ROOT = ""
+MEDIA_ROOT = "storage/"
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}
