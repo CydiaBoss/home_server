@@ -16,6 +16,8 @@ Including another URLconf
 from django.conf import settings
 from django.urls import path
 
+from youtube.views.download import YTDownloadView
+
 urlpatterns = [
-    path(r'^dl/(?P<path>.*)$', lambda todo : {}),
+    path(r'dl/', YTDownloadView.as_view()),
 ]
