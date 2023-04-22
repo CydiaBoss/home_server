@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
-from youtube_dl import YoutubeDL
+from yt_dlp import YoutubeDL
 
 class YTDownloadView(APIView):
     
@@ -17,7 +17,7 @@ class YTDownloadView(APIView):
         with yt_dl:
             result = yt_dl.extract_info(
                 'http://www.youtube.com/watch?v=BaW_jenozKc',
-                download=False # We just want to extract the info
+                download=False, # We just want to extract the info
             )
 
         if 'entries' in result:
@@ -27,11 +27,7 @@ class YTDownloadView(APIView):
             # Just a video
             video = result
 
-        print(video)
-        video_url = video['url']
-        print(video_url)
-
         return Response({
             'success': "ok",
-            'payload': video_url
+            'payload': video
         })
