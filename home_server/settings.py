@@ -41,11 +41,12 @@ INSTALLED_APPS = [
 
     # REST Framework
     'rest_framework',
+    'rest_framework.authtoken',
 
     # Custom Apps
     'common',
     'home_user',
-    'media',
+    'cdn',
     'youtube',
 ]
 
@@ -145,8 +146,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_ROOT = "storage/"
 
 REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ]
 }

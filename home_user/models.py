@@ -1,7 +1,10 @@
+from rest_framework.authtoken.models import Token
+
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.utils.translation import gettext_lazy as _
+from common.models import TimeStampMixin
 
 from home_user.managers import HomeUserManager
 
@@ -27,3 +30,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
+    
+class UserSession(TimeStampMixin):
+    '''
+    A User Session model
+    '''
+    token = models.OneToOneField(Token, on_delete=models.CASCADE, verbose_name=_("authentication token"))
+    ip_address = models.GenericIPAddressField(_("ip address"), protocol="IPv4")
