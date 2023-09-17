@@ -25,7 +25,7 @@ class MediaRetrieveView(View):
 
         # Fail Directory or Not Found
         if filepath.is_dir() or not filepath.exists():
-            raise Http404(_("“%(path)s” is not accessible") % {"path": filepath})
+            raise Http404(_(f"“{filepath}” is not accessible"))
         
         # Respect the If-Modified-Since header.
         statobj = filepath.stat()

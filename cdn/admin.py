@@ -2,10 +2,10 @@ from django.contrib import admin
 
 from cdn.models import *
 
-@admin.register(Photo)
-class PhotoAdmin(admin.ModelAdmin):
+@admin.register(File)
+class FileAdmin(admin.ModelAdmin):
     pass
 
-@admin.register(Video)
-class VideoAdmin(admin.ModelAdmin):
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
     pass

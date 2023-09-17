@@ -4,19 +4,20 @@ from home_user.models import User
 
 from common.models import TimeStampMixin
 
-from .settings import *
+class Tag(models.Model):
+    name = models.CharField(max_length=256, unique=True, error_messages={"unique": "tag already exists"})
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, default=None)
 
-class MediaMixin(TimeStampMixin):
+    def __str__(self) -> str:
+        return self.name
+
+class File(TimeStampMixin):
     file_name = models.CharField(max_length=256)
     file_ext = models.CharField(max_length=32)
-    file = models.FileField(upload_to=DEFAULT_DIRECTORY)
     uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
-    class Meta:
-        abstract = True
+    # Tags
+    tags = models.ManyToManyField(Tag, related_name="files")
 
-class Photo(MediaMixin):
-    file = models.ImageField(upload_to=PHOTO_DIRECTORY)
-
-class Video(MediaMixin):
-    file = models.FileField(upload_to=VIDEO_DIRECTORY)
+    def __str__(self) -> str:
+        return f"{self.file_name}.{self.file_ext}"
