@@ -13,7 +13,7 @@ class LoginView(APIView):
 
     permission_classes = [AllowAny,]
 
-    def post(request : Request):
+    def post(self, request : Request):
         # Retrieves User Credentials
         username = request.data.get("username", None)
         password = request.data.get("password", None)
@@ -31,5 +31,18 @@ class LoginView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Create Token for Success
-        token = Token.objects
+        # Create Token for Success or Retrieve existing
+        token = get_or_none(Token, user=user)
+        if token is None:
+            token = Token()
+            token.user = user
+            token.save()
+
+        # Return
+        return Response(
+            data={
+                "success": "ok",
+                "payload": token.key
+            }, 
+            status=status.HTTP_200_OK
+        )

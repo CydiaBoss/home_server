@@ -16,8 +16,8 @@ Including another URLconf
 from django.conf import settings
 from django.urls import path
 
-from youtube.views.download import YTDownloadView
+from home_user.views.login import LoginView
 
 urlpatterns = [
-    path(r'dl/', YTDownloadView.as_view()),
+    path(r'login/', LoginView.as_view()),
 ]
