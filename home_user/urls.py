@@ -17,7 +17,9 @@ from django.conf import settings
 from django.urls import path
 
 from home_user.views.login import LoginView
+from home_user.views.logout import LogoutView
 
 urlpatterns = [
     path(r'login/', LoginView.as_view()),
+    path(r'logout/', LogoutView.as_view()),
 ]
