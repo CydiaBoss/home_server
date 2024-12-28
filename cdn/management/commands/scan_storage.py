@@ -13,11 +13,19 @@ class Command(BaseCommand):
 	def handle(self, *args, **options):
 		self.stdout.write('Started scanning the MEDIA_ROOT')
 
-		self._process_dir_items(settings.MEDIA_ROOT)
+		# Add counter to options
+		options["_file_count"] = 0
+
+		# Start recursion
+		self._process_dir_items(options, settings.MEDIA_ROOT)
 
 		self.stdout.write(self.style.SUCCESS('Successfully scanned the MEDIA_ROOT'))
+		
+	def add_arguments(self, parser):
+		parser.add_argument("--batch_size", type=int, help="batch size to use before bulk creating new entries in DB", default=50)
+		parser.add_argument("--max_reads", type=int, help="maximum amount of entries to make", default=-1)
 
-	def _process_dir_items(self, dir_name : str, parent_folder : Union[Folder, None]=None):
+	def _process_dir_items(self, options : dict[str], dir_name : str, parent_folder : Union[Folder, None]=None):
 		"""
 		Walk through directory and creates a model for them if not already
 		"""
@@ -29,6 +37,10 @@ class Command(BaseCommand):
 
 		# Looping
 		for item in os.listdir(dir_name):
+			# Check file count
+			if options["max_reads"] != -1 and options["_file_count"] >= options["max_reads"]:
+				break
+
 			# Item path
 			item_path = f'{dir_name}{item}'
 
@@ -44,7 +56,7 @@ class Command(BaseCommand):
 				)
 				
 				# Process its children
-				self._process_dir_items(item_path + "/", folder)
+				self._process_dir_items(options, item_path + "/", folder)
 
 				# Finish
 				continue
@@ -79,6 +91,13 @@ class Command(BaseCommand):
 
 			# Add to temp list
 			files.append(file)
+			options["_file_count"] += 1
 
-		# Bulk create
-		File.objects.bulk_create(files)
+			# Batch Create and Reset
+			if len(files) % options["batch_size"] == 0:
+				File.objects.bulk_create(files)
+				files = []
+
+		# Bulk create remaining
+		if len(files) > 0: 
+			File.objects.bulk_create(files)

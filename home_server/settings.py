@@ -149,7 +149,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Media Root
 # https://docs.djangoproject.com/en/4.1/ref/settings/#std-setting-MEDIA_ROOT
 
-MEDIA_ROOT = "storage/"
+MEDIA_ROOT = os.getenv("MEDIAROOT")
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
