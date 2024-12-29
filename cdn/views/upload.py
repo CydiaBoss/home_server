@@ -5,11 +5,10 @@ from rest_framework import status
 from rest_framework.parsers import FileUploadParser
 
 from cdn.models import File
-from home_user.models import User
 
-from common.utils import get_or_none
+from common.utils import get_or_none, get_media_types
 
-from home_server import settings
+from django.conf import settings
 
 class UploadView(APIView):
     
@@ -26,6 +25,9 @@ class UploadView(APIView):
         '''
         # Uploaded file
         file = request.FILES.get("file")
+
+        # Grab Valid Media Types
+        media_type, _ = get_media_types()
 
         # Validate file exists
         if file is None:
@@ -46,7 +48,7 @@ class UploadView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
         # Validate file type is valid media type
-        elif file.content_type.lower() not in settings.MEDIA_MIMETYPES:
+        elif file.content_type.lower() not in media_type:
             return Response(
                 data={
                     "success": "fail",
@@ -56,23 +58,25 @@ class UploadView(APIView):
             )
 
         # Make entry in DB
-        file = File(
+        file_obj = File(
             file_name=".".join(filename.split(".")[0:-1]),
             file_ext=filename.split(".")[-1],
             uploaded_by=request.user,
         )
-        file.save()
 
         # Upload 
-        f = open(f"{settings.MEDIAROOT}/{filename}", "wb")
+        f = open(f"{settings.MEDIA_ROOT}/{filename}", "wb")
         f.write(file.read())
         f.close()
+
+        # Save
+        file_obj.save()
 
         # Return
         return Response(
             data={
                 "success": "success",
-                "message": "user logged out"
+                "message": "file %s uploaded successfully" % filename
             }, 
             status=status.HTTP_200_OK
         )

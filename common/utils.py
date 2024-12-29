@@ -50,7 +50,7 @@ def get_media_types() -> tuple[list[str], list[str]]:
     MEDIA_EXT = []
     mimetypes.init()
     for ext in mimetypes.types_map:
-        if mimetypes.types_map[ext].split('/')[0] == ("video", "audio", "image"):
+        if mimetypes.types_map[ext].split('/')[0] in ("video", "audio", "image"):
             MEDIA_MIMETYPES.append(mimetypes.types_map[ext].lower())
             MEDIA_EXT.append(ext[1:])
 

@@ -23,7 +23,7 @@ class Folder(TimeStampMixin):
         return self.name
     
     class Meta:
-        unique_together = ['parent', 'name']
+        unique_together = (('parent', 'name'),)
 
 class File(TimeStampMixin):
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE, blank=True, null=True, default=None)
@@ -42,4 +42,4 @@ class File(TimeStampMixin):
         return f"{self.file_name}.{self.file_ext}"
     
     class Meta:
-        unique_together = ['folder', 'file_name', 'file_ext']
+        unique_together = (('folder', 'file_name', 'file_ext'),)
