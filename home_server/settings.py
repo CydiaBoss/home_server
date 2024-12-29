@@ -12,7 +12,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 from pathlib import Path
 
-import os
+import os, mimetypes
+
 from dotenv import load_dotenv
 
 from django.utils.translation import gettext_lazy as _
@@ -150,6 +151,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#std-setting-MEDIA_ROOT
 
 MEDIA_ROOT = os.getenv("MEDIAROOT")
+
+# Media Types
+MEDIA_MIMETYPES = []
+MEDIA_EXT = []
+mimetypes.init()
+for ext in mimetypes.types_map:
+    if mimetypes.types_map[ext].split('/')[0] == ("video", "audio", "image"):
+        MEDIA_MIMETYPES.append(mimetypes.types_map[ext])
+        MEDIA_EXT.append(ext[1:])
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [

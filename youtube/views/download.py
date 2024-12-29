@@ -11,12 +11,15 @@ class YTDownloadView(APIView):
         '''
         Retrieve YouTube a YT Video
 
-        Route: [GET] /yt/dl/?url=:url
+        Route: [GET] /yt/dl
+
+        Query Parameters:
+        - url: str (The URL of the video)
         '''
         # Extract URL
         url = request.query_params.get("url", None)
 
-        if url is None:
+        if url is None or url == "":
             return Response({
                 'success': 'fail',
                 'message': 'url not found'

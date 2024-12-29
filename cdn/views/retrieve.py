@@ -25,7 +25,7 @@ class MediaRetrieveView(View):
 
         # Template from Django serve function #
 
-        Route: [GET] /cdn/media/:path_to_file/
+        Route: [GET] /cdn/media/:path_to_file
         '''
         # Get Path
         filepath = get_filepath(path=path)
@@ -60,10 +60,10 @@ class MediaRetrieveListView(APIView):
         Route: [GET] /cdn/list
 
         Query Parameters:
-        random: bool = False (Randomize the list)
-        total_amt: int = 50 (Total amount of images to retrieve; ignored if ids or names are provided)
-        ids: list = [] (List of images to retrieve using ids; ignored if random is True)
-        names: list = [] (List of images to retrieve using names; ignored if random is True)
+        - random: bool = False (Randomize the list)
+        - total_amt: int = 50 (Total amount of images to retrieve; ignored if ids or names are provided)
+        - ids: list = [] (List of images to retrieve using ids; ignored if random is True)
+        - names: list = [] (List of images to retrieve using names; ignored if random is True)
         '''
         # Get Query Parameters
         randomize = request.query_params.get("random", False) == "true"

@@ -19,5 +19,5 @@ from django.urls import path
 from youtube.views.download import YTDownloadView
 
 urlpatterns = [
-    path(r'dl/', YTDownloadView.as_view()),
+    path(r'dl', YTDownloadView.as_view()),
 ]

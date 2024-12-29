@@ -1,4 +1,4 @@
-import os, re, mimetypes
+import os, re
 from typing import Union
 
 from django.core.management.base import BaseCommand
@@ -18,13 +18,6 @@ class Command(BaseCommand):
 
 	def handle(self, *args, **options):
 		self.stdout.write('Started scanning the MEDIA_ROOT')
-
-		# Media Only (Records all files types that correspond to media files)
-		if options["media_only"]:
-			mimetypes.init()
-			for ext in mimetypes.types_map:
-				if mimetypes.types_map[ext].split('/')[0] == ("video", "audio", "image"):
-					self.file_types.append(ext[1:])
 
 		# Start recursion
 		self._process_dir_items(options, settings.MEDIA_ROOT)
@@ -81,7 +74,7 @@ class Command(BaseCommand):
 				continue
 
 			# Media Only Check
-			if options["media_only"] and parsed_name.group(2) not in self.file_types:
+			if options["media_only"] and parsed_name.group(2) not in settings.MEDIA_EXT:
 				self.stdout.write('File "%s" is not a media file' % item)
 				continue
 

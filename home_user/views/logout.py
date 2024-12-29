@@ -38,7 +38,7 @@ class LogoutView(APIView):
         # Return
         return Response(
             data={
-                "success": "ok",
+                "success": "success",
                 "message": "user logged out"
             }, 
             status=status.HTTP_200_OK

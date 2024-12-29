@@ -41,7 +41,7 @@ class LoginView(APIView):
         # Return
         return Response(
             data={
-                "success": "ok",
+                "success": "success",
                 "payload": token.key
             }, 
             status=status.HTTP_200_OK
