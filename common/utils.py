@@ -1,4 +1,4 @@
-import posixpath
+import mimetypes, posixpath
 from pathlib import Path
 
 from typing import Type, TypeVar, Union
@@ -36,3 +36,22 @@ def get_filepath(path : str) -> Path:
     """
     path = posixpath.normpath(path).lstrip("/")
     return Path(safe_join(settings.MEDIA_ROOT, path))
+
+def get_media_types() -> tuple[list[str], list[str]]:
+    """
+    Retrieves the media types from the settings
+
+    Returns:
+        A list of media types
+    """
+
+    # Media Types
+    MEDIA_MIMETYPES = []
+    MEDIA_EXT = []
+    mimetypes.init()
+    for ext in mimetypes.types_map:
+        if mimetypes.types_map[ext].split('/')[0] == ("video", "audio", "image"):
+            MEDIA_MIMETYPES.append(mimetypes.types_map[ext].lower())
+            MEDIA_EXT.append(ext[1:])
+
+    return MEDIA_MIMETYPES, MEDIA_EXT

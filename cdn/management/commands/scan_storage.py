@@ -5,13 +5,15 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 
 from cdn.models import *
-from common.utils import get_or_none
+from common.utils import get_or_none, get_media_types
 
 class Command(BaseCommand):
 	help = 'Scans the MEDIA_ROOT folder and populates the database as needed'
 
 	# Tracks max file reads
 	_file_count = 0
+
+	_, _media_ext = get_media_types()
 
 	# Approved file types
 	file_types = []
@@ -74,7 +76,7 @@ class Command(BaseCommand):
 				continue
 
 			# Media Only Check
-			if options["media_only"] and parsed_name.group(2) not in settings.MEDIA_EXT:
+			if options["media_only"] and parsed_name.group(2) not in self._media_ext:
 				self.stdout.write('File "%s" is not a media file' % item)
 				continue
 

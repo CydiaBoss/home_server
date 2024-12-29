@@ -9,9 +9,10 @@ from home_user.models import User
 
 from common.utils import get_or_none
 
-from django.conf import settings
+from home_server import settings
 
 class UploadView(APIView):
+    
     parser_classes = (FileUploadParser,)
 
     def put(self, request : Request, filename=""):
@@ -45,7 +46,7 @@ class UploadView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
         # Validate file type is valid media type
-        elif file.content_type not in settings.MEDIA_MIMETYPES:
+        elif file.content_type.lower() not in settings.MEDIA_MIMETYPES:
             return Response(
                 data={
                     "success": "fail",
