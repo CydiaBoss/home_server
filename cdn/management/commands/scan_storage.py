@@ -1,4 +1,4 @@
-import os, re
+import os, re, mimetypes
 from typing import Union
 
 from django.core.management.base import BaseCommand
@@ -10,11 +10,21 @@ from common.utils import get_or_none
 class Command(BaseCommand):
 	help = 'Scans the MEDIA_ROOT folder and populates the database as needed'
 
+	# Tracks max file reads
+	_file_count = 0
+
+	# Approved file types
+	file_types = []
+
 	def handle(self, *args, **options):
 		self.stdout.write('Started scanning the MEDIA_ROOT')
 
-		# Add counter to options
-		options["_file_count"] = 0
+		# Media Only (Records all files types that correspond to media files)
+		if options["media_only"]:
+			mimetypes.init()
+			for ext in mimetypes.types_map:
+				if mimetypes.types_map[ext].split('/')[0] == ("video", "audio", "image"):
+					self.file_types.append(ext[1:])
 
 		# Start recursion
 		self._process_dir_items(options, settings.MEDIA_ROOT)
@@ -24,6 +34,7 @@ class Command(BaseCommand):
 	def add_arguments(self, parser):
 		parser.add_argument("--batch_size", type=int, help="batch size to use before bulk creating new entries in DB", default=50)
 		parser.add_argument("--max_reads", type=int, help="maximum amount of entries to make", default=-1)
+		parser.add_argument("--media_only", help="toggle scan to media files only", action="store_true", default=False)
 
 	def _process_dir_items(self, options : dict[str], dir_name : str, parent_folder : Union[Folder, None]=None):
 		"""
@@ -38,7 +49,7 @@ class Command(BaseCommand):
 		# Looping
 		for item in os.listdir(dir_name):
 			# Check file count
-			if options["max_reads"] != -1 and options["_file_count"] >= options["max_reads"]:
+			if options["max_reads"] != -1 and self._file_count >= options["max_reads"]:
 				break
 
 			# Item path
@@ -62,11 +73,16 @@ class Command(BaseCommand):
 				continue
 
 			# Parse File Name
-			parsed_name = re.match(r"^([\w,\s\-\.]+)\.([A-Za-z]+)$", item)
+			parsed_name = re.match(r"^([\w,\s\-\.\(\)]+)?\.([A-Za-z]+)$", item)
 
 			# Skip file if fail to parse 
 			if parsed_name is None:
 				self.stderr.write('File "%s" could not be parsed' % item)
+				continue
+
+			# Media Only Check
+			if options["media_only"] and parsed_name.group(2) not in self.file_types:
+				self.stdout.write('File "%s" is not a media file' % item)
 				continue
 
 			# Look for file
@@ -86,18 +102,21 @@ class Command(BaseCommand):
 			file.folder = parent_folder
 
 			# Process file name
-			file.file_name = parsed_name.group(1)
+			file.file_name = parsed_name.group(1) if parsed_name.group(1) is not None else ""
 			file.file_ext = parsed_name.group(2)
 
 			# Add to temp list
 			files.append(file)
-			options["_file_count"] += 1
+			self.stdout.write('File "%s" object queued for creation' % item)
+			self._file_count += 1
 
 			# Batch Create and Reset
 			if len(files) % options["batch_size"] == 0:
 				File.objects.bulk_create(files)
+				self.stdout.write(self.style.SUCCESS('Latest file batch created successfully'))
 				files = []
 
 		# Bulk create remaining
 		if len(files) > 0: 
 			File.objects.bulk_create(files)
+			self.stdout.write(self.style.SUCCESS('Remaining files created successfully'))

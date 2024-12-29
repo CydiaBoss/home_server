@@ -23,7 +23,7 @@ class Folder(TimeStampMixin):
 
 class File(TimeStampMixin):
     folder = models.ForeignKey(Folder, on_delete=models.CASCADE, blank=True, null=True, default=None)
-    file_name = models.CharField(max_length=256)
+    file_name = models.CharField(max_length=256, blank=True)
     file_ext = models.CharField(max_length=32)
     uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, default=None)
 
