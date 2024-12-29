@@ -15,8 +15,9 @@ Including another URLconf
 """
 from django.urls import re_path, path
 
-from cdn.views.retrieve import MediaRetrieveView
+from cdn.views.retrieve import *
 
 urlpatterns = [
+    path(r'list', MediaRetrieveListView.as_view()),
     re_path(r'^media/(?P<path>.*)$', MediaRetrieveView.as_view()),
 ]

@@ -15,6 +15,10 @@ class Folder(TimeStampMixin):
     parent = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=True, default=None)
     name = models.CharField(max_length=256)
 
+    @property
+    def path(self) -> str:
+        return f"{self.parent}/{self.name}" if self.parent is not None else f"{self.name}"
+
     def __str__(self) -> str:
         return self.name
     
@@ -29,6 +33,10 @@ class File(TimeStampMixin):
 
     # Tags
     tags = models.ManyToManyField(Tag, related_name="files")
+
+    @property
+    def path(self) -> str:
+        return f"{self.folder.path}/{self.file_name}.{self.file_ext}" if self.folder is not None else f"{self.file_name}.{self.file_ext}"
 
     def __str__(self) -> str:
         return f"{self.file_name}.{self.file_ext}"
