@@ -13,3 +13,7 @@ class FileAdmin(admin.ModelAdmin):
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(Person)
+class PersonAdmin(admin.ModelAdmin):
+    pass

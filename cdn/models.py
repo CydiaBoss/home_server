@@ -43,3 +43,6 @@ class File(TimeStampMixin):
     
     class Meta:
         unique_together = (('folder', 'file_name', 'file_ext'),)
+    
+class Person(Tag):
+    thumbnail = models.ForeignKey(File, on_delete=models.SET_NULL, blank=True, null=True, default=None)
