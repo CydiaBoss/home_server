@@ -45,8 +45,8 @@ class Command(BaseCommand):
 			return
 
 		# Process section
-		person_tag_batch = []
-		person_ids = {}
+		person_tag_batch : Person = []
+		person_ids : dict[str, Person] = {}
 		for flag in config[person_section]:
 			name = config[person_section][flag].strip().translate(str.maketrans('', '', string.punctuation))
 			# Check the records
@@ -63,16 +63,27 @@ class Command(BaseCommand):
 			Person.objects.bulk_create(person_tag_batch)
 
 		# Start Processing
+		files_to_update = []
 		for section in config.sections():
 			# Bypass if no faces flag
 			if "faces" not in config[section]:
 				continue
 
-			# TODO loop thru pictures and add person tag if not already
+			# Bypass if file not exist
+			file_name_chunk = section.split(".")
+			picture = get_or_none(File, file_name=".".join(file_name_chunk[:-1]), file_ext=".".join(file_name_chunk[-1]))
+			if picture is None:
+				self.stdout.write(self.style.ERROR('Could not find the file ' + section))
+				continue
+
+			# Process Each Entry
+			for info in config[section]["face"].split(";"):
+				# TODO maybe issue here
+				picture.tags.add(person_ids[info.split(",")[1]])
 
 		self.stdout.write(self.style.SUCCESS('Successfully scanned the MEDIA_ROOT'))
 		
 	def add_arguments(self, parser):
 		parser.add_argument("--batch_size", type=int, help="batch size to use before bulk creating new entries in DB", default=50)
 		parser.add_argument("--max_reads", type=int, help="maximum amount of entries to make", default=-1)
-		parser.add_argument("--media_only", help="toggle scan to media files only", action="store_true", default=False)
+		parser.add_argument("--dir", help="directory to scan within MEDIA_ROOT", default="")
