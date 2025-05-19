@@ -77,15 +77,15 @@ class Command(BaseCommand):
 			if options["dir"] != "":
 				# Process the path
 				folders = options["dir"].split("/")
-				dir_q = Q(folder__name=folders[-1])
+				dir_q = Q(folder__name__iexact=folders[-1])
 				layer_count = 1
 				for folder in reversed(folders[:-1]):
 					dir_q &= Q(**{
-						f"folder{'__parent'*layer_count}__name": folder
+						f"folder{'__parent'*layer_count}__name__iexact": folder
 					})
 			
 			# Query
-			picture = get_or_none(File, dir_q, file_name=".".join(file_name_chunk[:-1]), file_ext=file_name_chunk[-1])
+			picture = get_or_none(File, dir_q, file_name__iexact=".".join(file_name_chunk[:-1]), file_ext__iexact=file_name_chunk[-1])
 			if picture is None:
 				self.stdout.write(self.style.ERROR('Could not find the file ' + section))
 				continue
@@ -94,7 +94,7 @@ class Command(BaseCommand):
 			for info in config[section]["faces"].split(";"):
 				picture.tags.add(person_ids[info.split(",")[1]])
 
-		self.stdout.write(self.style.SUCCESS('Successfully scanned the MEDIA_ROOT'))
+		self.stdout.write(self.style.SUCCESS(f'Successfully parsed the config file {ini_file} in directory {root_dir}'))
 		
 	def add_arguments(self, parser):
 		parser.add_argument("--dir", help="directory to scan within MEDIA_ROOT", default="")
