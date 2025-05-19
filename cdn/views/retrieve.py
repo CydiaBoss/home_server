@@ -1,5 +1,6 @@
 import mimetypes, random
 
+from django.core.paginator import Paginator
 from django.http.request import HttpRequest
 from django.http import FileResponse, Http404, HttpResponseNotModified
 from django.utils.http import http_date
@@ -7,10 +8,10 @@ from django.utils.translation import gettext as _
 from django.views import View
 from django.views.static import was_modified_since
 
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.request import Request
-from rest_framework import status
 
 from common.utils import get_filepath
 
@@ -61,13 +62,15 @@ class MediaRetrieveListView(APIView):
 
         Query Parameters:
         - random: bool = False (Randomize the list)
-        - total_amt: int = 50 (Total amount of images to retrieve; ignored if ids or names are provided)
+        - total_amt: int = 50 (Total amount of images to retrieve per page; total amount to query if used with random)
+        - page: int = 1 (Current page to retrieve of the query)
         - ids: list = [] (List of images to retrieve using ids; ignored if random is True)
         - names: list = [] (List of images to retrieve using names; ignored if random is True)
         '''
         # Get Query Parameters
         randomize = request.query_params.get("random", False) == "true"
         total_amt = int(request.query_params.get("total_amt", 50))
+        page = int(request.query_params.get("page", 1))
         ids = request.query_params.get("ids", [])
         if type(ids) == str:
             ids = ids.split(",")
@@ -75,7 +78,7 @@ class MediaRetrieveListView(APIView):
         if type(names) == str:
             names = names.split(",")
 
-        # Get Files randomily
+        # Get Files randomly
         if randomize:
             # Generate random list of ids
             ids = list(File.objects.values_list("id", flat=True))
@@ -84,79 +87,45 @@ class MediaRetrieveListView(APIView):
 
             # Get Files
             files = File.objects.filter(id__in=ids)
-
-            # Generate Response
-            payload = {
-                "status": "success",
-                "total": len(files),
-                "files": []
-            }
-
-            # Return Response
-            for file in files:
-                payload["files"].append({
-                    "id": file.id,
-                    "name": file.file_name,
-                    "ext": file.file_ext,
-                    "full_name": f"{file.file_name}.{file.file_ext}",
-                    "url": file.path
-                })
-
-            # Return Response
-            return Response(payload)
         
         # Get Files by ids
         elif len(ids) > 0:
             # Get Files
             files = File.objects.filter(id__in=ids)
-
-            # Generate Response
-            payload = {
-                "status": "success",
-                "total": len(files),
-                "files": []
-            }
-
-            # Return Response
-            for file in files:
-                payload["files"].append({
-                    "id": file.id,
-                    "name": file.file_name,
-                    "ext": file.file_ext,
-                    "full_name": f"{file.file_name}.{file.file_ext}",
-                    "url": file.path
-                })
-
-            # Return Response
-            return Response(payload)
         
         # Get Files by names
         elif len(names) > 0:
             # Get Files
             files = File.objects.filter(file_name__in=names)
-
-            # Generate Response
-            payload = {
-                "status": "success",
-                "total": len(files),
-                "files": []
-            }
-
-            # Return Response
-            for file in files:
-                payload["files"].append({
-                    "id": file.id,
-                    "name": file.file_name,
-                    "ext": file.file_ext,
-                    "full_name": f"{file.file_name}.{file.file_ext}",
-                    "url": file.path
-                })
-
-            # Return Response
-            return Response(payload)
         
         else:
             return Response({
                 "status": "fail",
                 "error": "No valid query parameters provided"
             }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Make Paginator
+        paginator = Paginator(files, total_amt)
+        page_obj = paginator.get_page(page)
+
+        # Generate Response
+        payload = {
+            "status": "success",
+            "total": (page_obj.end_index() + 1) - page_obj.start_index(),
+            "page_count": paginator.num_pages,
+            "prev_page": page_obj.previous_page_number() if page_obj.has_previous() else -1,
+            "next_page": page_obj.next_page_number() if page_obj.has_next() else -1,
+            "payload": []
+        }
+
+        # Return Response
+        for file in page_obj:
+            payload["payload"].append({
+                "id": file.id,
+                "name": file.file_name,
+                "ext": file.file_ext,
+                "url": file.path
+            })
+
+        # Return Response
+        return Response(payload)
