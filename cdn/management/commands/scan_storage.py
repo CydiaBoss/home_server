@@ -30,6 +30,7 @@ class Command(BaseCommand):
 		parser.add_argument("--batch_size", type=int, help="batch size to use before bulk creating new entries in DB", default=50)
 		parser.add_argument("--max_reads", type=int, help="maximum amount of entries to make", default=-1)
 		parser.add_argument("--media_only", help="toggle scan to media files only", action="store_true", default=False)
+		parser.add_argument("--include_ini", help="toggle include .ini files", action="store_true", default=False)
 
 	def _process_dir_items(self, options : dict[str], dir_name : str, parent_folder : Union[Folder, None]=None):
 		"""
@@ -78,6 +79,11 @@ class Command(BaseCommand):
 			# Media Only Check
 			if options["media_only"] and parsed_name.group(2) not in self._media_ext:
 				self.stdout.write('File "%s" is not a media file' % item)
+				continue
+
+			# .ini File Check
+			if parsed_name.group(2) == "ini" and not options["include_ini"]:
+				self.stdout.write('File "%s" is an ini config file; skipping' % item)
 				continue
 
 			# Look for file
