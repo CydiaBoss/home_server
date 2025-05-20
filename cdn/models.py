@@ -1,3 +1,5 @@
+import string
+
 from django.db import models
 
 from home_user.models import User
@@ -14,6 +16,10 @@ class Tag(models.Model):
 class Folder(TimeStampMixin):
     parent = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=True, default=None)
     name = models.CharField(max_length=256)
+
+    def clean(self):
+        self.name = self.name.lower()
+        return super().clean()
 
     @property
     def path(self) -> str:
@@ -34,6 +40,11 @@ class File(TimeStampMixin):
     # Tags
     tags = models.ManyToManyField(Tag, related_name="files")
 
+    def clean(self):
+        self.file_name = self.file_name.lower()
+        self.file_ext = self.file_ext.lower()
+        return super().clean()
+
     @property
     def path(self) -> str:
         return f"{self.folder.path}/{self.file_name}.{self.file_ext}" if self.folder is not None else f"{self.file_name}.{self.file_ext}"
@@ -46,3 +57,7 @@ class File(TimeStampMixin):
     
 class Person(Tag):
     thumbnail = models.ForeignKey(File, on_delete=models.SET_NULL, blank=True, null=True, default=None)
+
+    def clean(self):
+        self.name = string.capwords(self.name)
+        return super().clean()

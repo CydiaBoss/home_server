@@ -55,7 +55,7 @@ class Command(BaseCommand):
 		for flag in config[person_section]:
 			name = config[person_section][flag].strip().translate(str.maketrans('', '', string.punctuation))
 			# Check the records
-			temp_person = get_or_none(Person, name=name)
+			temp_person = get_or_none(Person, name__iexact=name)
 			if temp_person is None:
 				temp_person = Person(
 					name=name,

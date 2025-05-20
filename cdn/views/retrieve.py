@@ -68,7 +68,7 @@ class MediaRetrieveListView(APIView):
         - names: list = [] (List of images to retrieve using names; ignored if random is True)
         '''
         # Get Query Parameters
-        randomize = request.query_params.get("random", False) == "true"
+        randomize = request.query_params.get("random", "0") == "1"
         total_amt = int(request.query_params.get("total_amt", 50))
         page = int(request.query_params.get("page", 1))
         ids = request.query_params.get("ids", [])
