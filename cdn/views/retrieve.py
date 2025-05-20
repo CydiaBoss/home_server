@@ -124,7 +124,7 @@ class MediaRetrieveListView(APIView):
                 "id": file.id,
                 "name": file.file_name,
                 "ext": file.file_ext,
-                "url": file.path
+                "url": f"/media/{file.path}"
             })
 
         # Return Response
