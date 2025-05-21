@@ -1,6 +1,7 @@
 import mimetypes, random
 
 from django.core.paginator import Paginator
+from django.db.models import Q
 from django.http.request import HttpRequest
 from django.http import FileResponse, Http404, HttpResponseNotModified
 from django.utils.http import http_date
@@ -61,14 +62,16 @@ class MediaRetrieveListView(APIView):
         Route: [GET] /cdn/list
 
         Query Parameters:
-        - random: bool = False (Randomize the list)
+        - random: bool = 0 (Randomize the list)
         - total_amt: int = 50 (Total amount of images to retrieve per page; total amount to query if used with random)
         - page: int = 1 (Current page to retrieve of the query)
         - ids: list = [] (List of images to retrieve using ids; ignored if random is True)
         - names: list = [] (List of images to retrieve using names; ignored if random is True)
+        - q: str = "" (Query using a search string; ignored if one of the previous methods are used)
         '''
         # Get Query Parameters
         randomize = request.query_params.get("random", "0") == "1"
+        query = request.query_params.get("q", "")
         total_amt = int(request.query_params.get("total_amt", 50))
         page = int(request.query_params.get("page", 1))
         ids = request.query_params.get("ids", [])
@@ -97,6 +100,11 @@ class MediaRetrieveListView(APIView):
         elif len(names) > 0:
             # Get Files
             files = File.objects.filter(file_name__in=names)
+
+        # Query string method
+        elif query != "":
+            # Get Files
+            files = File.objects.filter(Q(file_name__icontains=query) | Q(file_ext__icontains=query))
         
         else:
             return Response({
