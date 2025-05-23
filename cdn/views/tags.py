@@ -16,7 +16,7 @@ from common.utils import get_filepath
 
 from cdn.models import File, Person, Tag
 
-class TagsView(View):
+class TagsView(APIView):
     
     # GET Media
     def get(self, request : Request):
@@ -31,16 +31,22 @@ class TagsView(View):
         - people: bool = 0 (Filter for people tags only)
         """
         # Parse queries
-        query = request.query_params.get("q" "")
+        query = request.query_params.get("q", "")
         created_by = request.query_params.get("created_by", "-1")
         people = request.query_params.get("people", "0") == "1"
 
         # Make Query
-        filters = Q(name__icontains=query)
+        filters = Q()
+
+        # Add Query if not blank
+        if query != "":
+            filters = Q(name__icontains=query)
 
         # Created by check
         if created_by != "-1":
             filters &= Q(created_by__id=created_by)
+
+        print(filters)
 
         # Query Based on Model
         if people:
@@ -49,4 +55,9 @@ class TagsView(View):
             tags = Tag.objects.filter(filters)
 
         # Serialize and Return
-        data = TagSerializer(tags, many=True)
+        tag_data = TagSerializer(tags, many=True)
+
+        return Response({
+            "status": "success",
+            "payload": tag_data.data
+        })
