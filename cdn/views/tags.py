@@ -12,13 +12,13 @@ from rest_framework.response import Response
 from rest_framework.request import Request
 
 from cdn.serializers import TagSerializer
-from common.utils import get_filepath
+from common.utils import get_filepath, get_or_none
 
 from cdn.models import File, Person, Tag
 
 class TagsView(APIView):
     
-    # GET Media
+    # GET Tag
     def get(self, request : Request):
         """
         Get list of tags
@@ -36,17 +36,11 @@ class TagsView(APIView):
         people = request.query_params.get("people", "0") == "1"
 
         # Make Query
-        filters = Q()
-
-        # Add Query if not blank
-        if query != "":
-            filters = Q(name__icontains=query)
+        filters = Q(name__icontains=query)
 
         # Created by check
         if created_by != "-1":
             filters &= Q(created_by__id=created_by)
-
-        print(filters)
 
         # Query Based on Model
         if people:
@@ -60,4 +54,52 @@ class TagsView(APIView):
         return Response({
             "status": "success",
             "payload": tag_data.data
+        })
+    
+    # POST Tag
+    def post(self, request : Request):
+        """
+        Make a tag
+
+        Route: [POST] /cdn/tag
+
+        # Request Body
+        - name: str (Name for tag)
+        - person: bool (If this is a person)
+        - thumbnail: int (Id of photo for thumbnail; only used if 'person' is set to true)
+        """
+        # Parse queries
+        name = request.data.get("name")
+        person = request.data.get("person", False)
+        thumbnail = request.data.get("thumbnail")
+
+        # Make Query
+        if get_or_none(Tag, name=name) is not None:
+            return Response({
+                "status": "fail",
+                "message": "tag with that name already exists"
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check for Personhood
+        if person:
+            obj = Person(
+                name=name,
+            )
+
+            # Thumbnail Add
+            if thumbnail is not None:
+                obj.thumbnail_id = thumbnail
+        
+        else:
+            obj = Tag(
+                name=name
+            )
+
+        # Save
+        obj.save()
+
+        return Response({
+            "status": "success",
+            "message": f"tag '{name}' made successfully",
+            "payload": obj.pk
         })

@@ -109,7 +109,7 @@ class MediaRetrieveListView(APIView):
         else:
             return Response({
                 "status": "fail",
-                "error": "No valid query parameters provided"
+                "message": "No valid query parameters provided"
             }, status=status.HTTP_400_BAD_REQUEST)
 
         # Make Paginator

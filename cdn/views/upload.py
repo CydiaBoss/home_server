@@ -16,6 +16,7 @@ class UploadView(APIView):
     
     parser_classes = (FileUploadParser,)
 
+    # Upload File
     def put(self, request : Request, filepath=""):
         '''
         Upload API for manual user upload
