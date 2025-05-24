@@ -16,12 +16,13 @@ Including another URLconf
 from django.urls import re_path, path
 
 from cdn.views.retrieve import *
-from cdn.views.tags import TagsView
+from cdn.views.tags import TagsModifyView, TagsView
 from cdn.views.upload import *
 
 urlpatterns = [
-    path(r'list', MediaRetrieveListView.as_view()),
+    path(r'list/', MediaRetrieveListView.as_view()),
     re_path(r'^media/(?P<path>.*)$', MediaRetrieveView.as_view()),
     re_path(r'^upload/(?P<filepath>.*)$', UploadView.as_view()),
     path(r'tag/', TagsView.as_view()),
+    re_path(r'^tag/(?P<tag_id>\d+)/$', TagsModifyView.as_view()),
 ]

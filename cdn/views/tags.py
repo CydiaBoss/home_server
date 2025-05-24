@@ -68,7 +68,7 @@ class TagsView(APIView):
         - person: bool (If this is a person)
         - thumbnail: int (Id of photo for thumbnail; only used if 'person' is set to true)
         """
-        # Parse queries
+        # Parse body
         name = request.data.get("name")
         person = request.data.get("person", False)
         thumbnail = request.data.get("thumbnail")
@@ -96,10 +96,90 @@ class TagsView(APIView):
             )
 
         # Save
+        obj.created_by = request.user
         obj.save()
 
         return Response({
             "status": "success",
-            "message": f"tag '{name}' made successfully",
+            "message": "tag made successfully",
             "payload": obj.pk
+        })
+    
+class TagsModifyView(APIView):
+    
+    # GET Tag
+    def put(self, request : Request, tag_id=""):
+        """
+        Update a tag's info
+
+        Route: [PUT] /cdn/tag/:tag_id
+
+        # Request Path
+        - tag_id: ID of tag to update
+
+        # Request Body
+        - name: str (new name for tag)
+        - thumbnail: int (ID of File for thumbnail; only works for Person tags)
+        """
+        # Parse body
+        name = request.data.get("name")
+        thumbnail = request.query_params.get("thumbnail")
+
+        if name is None and thumbnail is None:
+            return Response({
+                "status": "fail",
+                "message": "nothing to update"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # Try finding objects
+        tag = get_or_none(Person, id=tag_id)
+
+        # Add thumbnail if possible
+        if tag is not None:
+            tag.thumbnail_id = thumbnail
+
+        # Get Actual Tag otherwise
+        else:
+            tag = get_or_none(Tag, id=tag_id)
+
+        # Fail if still none
+        if tag is None:
+            return Response({
+                "status": "fail",
+                "message": "tag does not exist"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # Update name
+        tag.name = name
+        tag.save()
+
+        return Response({
+            "status": "success",
+            "message": "tag updated"
+        })
+    
+    # POST Tag
+    def delete(self, request : Request, tag_id=""):
+        """
+        Delete a tag
+
+        Route: [DELETE] /cdn/tag/:tag_id
+
+        # Request Path
+        - tag_id: ID of tag to remove
+        """
+        # Make Query
+        tag = get_or_none(Tag, id=tag_id)
+        if tag is None:
+            return Response({
+                "status": "fail",
+                "message": "tag does not exist"
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # Save
+        tag.delete()
+
+        return Response({
+            "status": "success",
+            "message": "tag deleted successfully",
         })
