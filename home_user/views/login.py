@@ -38,6 +38,8 @@ class LoginView(APIView):
             token.user = user
             token.save()
 
+        # TODO Make UserSession here
+
         # Return
         return Response(
             data={
