@@ -1,3 +1,4 @@
+import random
 import string
 
 from django.db import models
@@ -47,7 +48,7 @@ class File(TimeStampMixin):
 
     @property
     def path(self) -> str:
-        return f"{self.folder.path}/{self.file_name}.{self.file_ext}" if self.folder is not None else f"{self.file_name}.{self.file_ext}"
+        return f"{self.folder.path}/{self.__str__()}" if self.folder is not None else self.__str__()
 
     def __str__(self) -> str:
         return f"{self.file_name}.{self.file_ext}"
@@ -66,7 +67,14 @@ class Person(Tag):
         return "%s (Person)" % self.name
     
 class Share(TimeStampMixin):
-    key = models.CharField(max_length=256, unique=True, error_messages={"unique": "key already exists"})
     shared_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, default=None)
     expires_at = models.DateTimeField(null=True, blank=True, default=None)
     media = models.ForeignKey(File, on_delete=models.CASCADE)
+
+    def generate_key(self) -> str:
+        '''
+        Generate a random key
+        '''
+        return ''.join(random.choices(string.ascii_letters + string.digits, k=256))
+
+    key = models.CharField(max_length=256, unique=True, error_messages={"unique": "key already exists"}, default=generate_key)

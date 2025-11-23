@@ -123,7 +123,7 @@ class TagsModifyView(APIView):
         """
         # Parse body
         name = request.data.get("name")
-        thumbnail = request.query_params.get("thumbnail")
+        thumbnail = request.data.get("thumbnail")
 
         if name is None and thumbnail is None:
             return Response({

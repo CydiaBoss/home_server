@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from cdn.models import Person, Tag
+from cdn.models import Person, Share, Tag
 
 class TagSerializer(serializers.ModelSerializer):
 	is_person = serializers.SerializerMethodField()
@@ -10,3 +10,8 @@ class TagSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Tag
 		fields = ["id", "name", "created_by", "is_person"]
+
+class ShareSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Share
+		fields = ["id", "key", "media", "expires_at"]

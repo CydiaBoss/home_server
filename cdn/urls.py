@@ -16,7 +16,7 @@ Including another URLconf
 from django.urls import re_path, path
 
 from cdn.views.retrieve import *
-from cdn.views.share import MediaShareView
+from cdn.views.share import MediaShareView, ShareView, ShareModifyView
 from cdn.views.tags import TagsModifyView, TagsView
 from cdn.views.upload import *
 
@@ -24,6 +24,8 @@ urlpatterns = [
     path(r'list/', MediaRetrieveListView.as_view()),
     re_path(r'^media/(?P<path>.*)$', MediaRetrieveView.as_view()),
     re_path(r'^share/(?P<key>.*)$', MediaShareView.as_view()),
+    path(r'sharelink/', ShareView.as_view()),
+    re_path(r'^sharelink/(?P<share_id>\d+)/$', ShareModifyView.as_view()),
     re_path(r'^upload/(?P<filepath>.*)$', UploadView.as_view()),
     path(r'tag/', TagsView.as_view()),
     re_path(r'^tag/(?P<tag_id>\d+)/$', TagsModifyView.as_view()),

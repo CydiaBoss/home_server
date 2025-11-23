@@ -2,10 +2,9 @@ import mimetypes, random
 
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.http import FileResponse, HttpResponseNotFound, HttpResponseNotModified
+from django.http import FileResponse, HttpResponseNotModified
 from django.utils.http import http_date
 from django.utils.translation import gettext as _
-from django.views import View
 from django.views.static import was_modified_since
 
 from rest_framework import status
@@ -33,7 +32,10 @@ class MediaRetrieveView(APIView):
 
         # Fail Directory or Not Found
         if filepath.is_dir() or not filepath.exists():
-            return HttpResponseNotFound(_(f"“{filepath}” is not accessible"))
+            return Response({
+                "status": "fail",
+                "message": f'"{filepath}" does not exist'
+            }, status=status.HTTP_404_NOT_FOUND)
         
         # Respect the If-Modified-Since header.
         statobj = filepath.stat()
