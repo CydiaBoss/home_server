@@ -31,6 +31,9 @@ class MediaShareView(APIView):
 
         Route: [GET] /cdn/share/:key
         '''
+        # Clean up key if needed
+        key = key.removesuffix("/")
+
         # Get Key
         share_obj = get_or_none(Share, key=key)
         if share_obj == None:

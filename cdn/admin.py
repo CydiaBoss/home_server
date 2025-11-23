@@ -17,3 +17,7 @@ class TagAdmin(admin.ModelAdmin):
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
     pass
+
+@admin.register(Share)
+class ShareAdmin(admin.ModelAdmin):
+    pass
