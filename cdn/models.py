@@ -64,3 +64,9 @@ class Person(Tag):
 
     def __str__(self) -> str:
         return "%s (Person)" % self.name
+    
+class Share(TimeStampMixin):
+    key = models.CharField(max_length=256, unique=True, error_messages={"unique": "key already exists"})
+    shared_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, default=None)
+    expires_at = models.DateTimeField(null=True, blank=True, default=None)
+    media = models.ForeignKey(File, on_delete=models.CASCADE)

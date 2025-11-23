@@ -10,26 +10,34 @@ from django.views.static import was_modified_since
 
 from rest_framework import status
 from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.request import Request
 
-from common.utils import get_filepath
+from common.utils import get_filepath, get_or_none
 
-from cdn.models import File
+from cdn.models import File, Share
 
-class MediaRetrieveView(APIView):
+class MediaShareView(APIView):
+    
+    permission_classes = [AllowAny,]
     
     # GET Media
-    def get(self, request : Request, path=""):
+    def get(self, request : Request, key=""):
         '''
         Retrieve a media file
 
         # Template from Django serve function #
 
-        Route: [GET] /cdn/media/:path_to_file
+        Route: [GET] /cdn/share/:key
         '''
+        # Get Key
+        share_obj = get_or_none(Share, key=key)
+        if share_obj == None:
+            return HttpResponseNotFound("share key does not exist")
+
         # Get Path
-        filepath = get_filepath(path=path)
+        filepath = get_filepath(path=share_obj.media.path)
 
         # Fail Directory or Not Found
         if filepath.is_dir() or not filepath.exists():
@@ -51,7 +59,7 @@ class MediaRetrieveView(APIView):
             response.headers["Content-Encoding"] = encoding
         return response
     
-class MediaRetrieveListView(APIView):
+class MediaShareControlView(APIView):
     
     # GET Media
     def get(self, request : Request):
