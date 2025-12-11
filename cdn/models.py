@@ -58,6 +58,7 @@ class File(TimeStampMixin):
     
 class Person(Tag):
     thumbnail = models.ForeignKey(File, on_delete=models.SET_NULL, blank=True, null=True, default=None)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, default=None, related_name="avatar")
 
     def save(self):
         self.name = string.capwords(self.name.strip())
