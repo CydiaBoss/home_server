@@ -64,6 +64,7 @@ class MediaRetrieveListView(APIView):
 
         Query Parameters:
         - random: bool = 0 (Randomize the list)
+        - personal: bool = 0 (Only get auth user's files)
         - total_amt: int = 50 (Total amount of images to retrieve per page; total amount to query if used with random)
         - page: int = 1 (Current page to retrieve of the query)
         - ids: list = [] (List of images to retrieve using ids; ignored if random is True)
@@ -72,6 +73,7 @@ class MediaRetrieveListView(APIView):
         '''
         # Get Query Parameters
         randomize = request.query_params.get("random", "0") == "1"
+        personal = request.query_params.get("personal", "0") == "1"
         query = request.query_params.get("q", "")
         total_amt = int(request.query_params.get("total_amt", 50))
         page = int(request.query_params.get("page", 1))
@@ -82,10 +84,14 @@ class MediaRetrieveListView(APIView):
         if type(names) == str:
             names = names.split(",")
 
+        # Personal filter
+        personal_filter = Q(uploaded_by=request.user) if personal else Q()
+
         # Get Files randomly
         if randomize:
+            # TODO fix this as will be very bad when a lot of data
             # Generate random list of ids
-            ids = list(File.objects.values_list("id", flat=True))
+            ids = list(File.objects.filter(personal_filter).values_list("id", flat=True))
             random.shuffle(ids)
             ids = ids[:total_amt]
 
@@ -95,17 +101,17 @@ class MediaRetrieveListView(APIView):
         # Get Files by ids
         elif len(ids) > 0:
             # Get Files
-            files = File.objects.filter(id__in=ids)
+            files = File.objects.filter(personal_filter, id__in=ids)
         
         # Get Files by names
         elif len(names) > 0:
             # Get Files
-            files = File.objects.filter(file_name__in=names)
+            files = File.objects.filter(personal_filter, file_name__in=names)
 
         # Query string method
         elif query != "":
             # Get Files
-            files = File.objects.filter(Q(file_name__icontains=query) | Q(file_ext__icontains=query))
+            files = File.objects.filter(personal_filter, Q(file_name__icontains=query) | Q(file_ext__icontains=query))
         
         else:
             return Response({
@@ -124,17 +130,13 @@ class MediaRetrieveListView(APIView):
             "page_count": paginator.num_pages,
             "prev_page": page_obj.previous_page_number() if page_obj.has_previous() else -1,
             "next_page": page_obj.next_page_number() if page_obj.has_next() else -1,
-            "payload": []
-        }
-
-        # Return Response
-        for file in page_obj:
-            payload["payload"].append({
+            "payload": [{
                 "id": file.id,
                 "name": file.file_name,
                 "ext": file.file_ext,
                 "url": f"/media/{file.path}"
-            })
+            } for file in page_obj]
+        }
 
         # Return Response
         return Response(payload)
