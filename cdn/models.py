@@ -61,7 +61,7 @@ class File(TimeStampMixin):
         unique_together = (('folder', 'file_name', 'file_ext'),)
 
 class VideoDetail(models.Model):
-    video = models.ForeignKey(File, on_delete=models.CASCADE, related_name="video_detail")
+    video = models.OneToOneField(File, on_delete=models.CASCADE, related_name="video_detail")
     timestamp = models.FloatField(default=0.0)
 
 class Person(Tag):
@@ -96,3 +96,6 @@ class Comment(TimeStampMixin):
 class Like(TimeStampMixin):
     liked_by = models.ForeignKey(User, on_delete=models.CASCADE)
     media = models.ForeignKey(File, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = (('liked_by', 'media'),)

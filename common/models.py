@@ -7,3 +7,9 @@ class TimeStampMixin(models.Model):
 
     class Meta:
         abstract = True
+
+class Languages(models.TextChoices):
+    EN = "EN", "English"
+    FR = "FR", "French"
+    ZH_CN = "ZH_CN", "Chinese (Simplified)"
+    ZH_TW = "ZH_TW", "Chinese (Traditional)"
