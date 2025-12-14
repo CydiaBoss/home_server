@@ -33,7 +33,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.username
 
-class UserSettings(models.Model):
+class UserSetting(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="settings")
 
     # Dark Mode
@@ -41,6 +41,9 @@ class UserSettings(models.Model):
 
     # Language
     lang = models.CharField(max_length=16, choices=Languages.choices, default=Languages.EN)
+
+    def __str__(self):
+        return str(self.user)
 
 class UserSession(TimeStampMixin):
     '''
