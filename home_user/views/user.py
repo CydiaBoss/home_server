@@ -90,13 +90,28 @@ class UserView(APIView):
         Route: [PUT] /user
 
         # Request Body
+		- email: str (email address)
         - first_name: str (first name)
         - last_name: str (last name)
 		- bio: str (biography)
+		- password: str (password)
+		- dark_mode: bool (uses dark mode)
+		- lang: str (language to use)
 		"""
+		if "email" in request.data and get_or_none(User, email=request.data.get("email")) is not None:
+			return Response({
+				"success": "fail",
+				"message": "email address already used"
+			}, status=status.HTTP_400_BAD_REQUEST)
+
+		request.user.email = request.data.get("email", request.user.email)
 		request.user.first_name = request.data.get("first_name", request.user.first_name)
 		request.user.last_name = request.data.get("last_name", request.user.last_name)
 		request.user.bio = request.data.get("bio", request.user.bio)
+
+		if "password" in request.data:
+			request.user.set_password(request.data.get("password"))
+
 		request.user.save()
 
 		return Response({

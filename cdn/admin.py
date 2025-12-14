@@ -10,6 +10,10 @@ class FolderAdmin(admin.ModelAdmin):
 class FileAdmin(admin.ModelAdmin):
     pass
 
+@admin.register(VideoDetail)
+class VideoDetailAdmin(admin.ModelAdmin):
+    pass
+
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     pass

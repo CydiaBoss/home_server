@@ -49,13 +49,17 @@ class File(TimeStampMixin):
         self.file_name = self.file_name.lower()
         self.file_ext = self.file_ext.lower()
         return super().clean()
+    
+    @property
+    def full_name(self) -> str:
+        return f"{self.file_name}.{self.file_ext}"
 
     @property
     def path(self) -> str:
-        return f"{self.folder.path}/{self.__str__()}" if self.folder is not None else self.__str__()
+        return f"{self.folder.path}/{self.full_name}" if self.folder is not None else self.full_name
 
     def __str__(self) -> str:
-        return f"{self.file_name}.{self.file_ext}"
+        return self.full_name
     
     class Meta:
         unique_together = (('folder', 'file_name', 'file_ext'),)
@@ -76,7 +80,7 @@ class Person(Tag):
         return "%s (Person)" % self.name
     
 class Share(TimeStampMixin):
-    shared_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, default=None)
+    shared_by = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, default=None, related_name="sharelinks")
     expires_at = models.DateTimeField(null=True, blank=True, default=None)
     media = models.ForeignKey(File, on_delete=models.CASCADE)
 
@@ -89,13 +93,13 @@ class Share(TimeStampMixin):
     key = models.CharField(max_length=256, unique=True, error_messages={"unique": "key already exists"}, default=generate_key)
 
 class Comment(TimeStampMixin):
-    written_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    media = models.ForeignKey(File, on_delete=models.CASCADE)
+    written_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
+    media = models.ForeignKey(File, on_delete=models.CASCADE, related_name="comments")
     comment = models.TextField(blank=False)
 
 class Like(TimeStampMixin):
-    liked_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    media = models.ForeignKey(File, on_delete=models.CASCADE)
+    liked_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="likes")
+    media = models.ForeignKey(File, on_delete=models.CASCADE, related_name="liked_by")
 
     class Meta:
         unique_together = (('liked_by', 'media'),)

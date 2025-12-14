@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.request import Request
 
+from cdn.serializers import DetailedFileSerializer, FileSerializer
 from common.utils import get_filepath
 
 from cdn.models import File
@@ -63,6 +64,7 @@ class MediaRetrieveListView(APIView):
         Route: [GET] /cdn/list
 
         Query Parameters:
+        - detailed: bool = 0 (Whether to use detailed view)
         - random: bool = 0 (Randomize the list)
         - personal: bool = 0 (Only get auth user's files)
         - total_amt: int = 50 (Total amount of images to retrieve per page; total amount to query if used with random)
@@ -72,6 +74,7 @@ class MediaRetrieveListView(APIView):
         - q: str = "" (Query using a search string; ignored if one of the previous methods are used)
         '''
         # Get Query Parameters
+        detailed = request.query_params.get("detailed", "0") == "1"
         randomize = request.query_params.get("random", "0") == "1"
         personal = request.query_params.get("personal", "0") == "1"
         query = request.query_params.get("q", "")
@@ -130,12 +133,7 @@ class MediaRetrieveListView(APIView):
             "page_count": paginator.num_pages,
             "prev_page": page_obj.previous_page_number() if page_obj.has_previous() else -1,
             "next_page": page_obj.next_page_number() if page_obj.has_next() else -1,
-            "payload": [{
-                "id": file.id,
-                "name": file.file_name,
-                "ext": file.file_ext,
-                "url": f"/media/{file.path}"
-            } for file in page_obj]
+            "payload": DetailedFileSerializer(page_obj, many=True).data if detailed else FileSerializer(page_obj, many=True).data
         }
 
         # Return Response
