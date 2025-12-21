@@ -5,9 +5,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 
-from common.utils import get_or_none
+from common.utils import get_client_ip, get_or_none
 
-from home_user.models import User
+from home_user.models import User, UserSession
 
 class LoginView(APIView):
 
@@ -38,9 +38,23 @@ class LoginView(APIView):
             token.user = user
             token.save()
 
-        # TODO Make UserSession here
+        # Remove old session
+        session = get_or_none(UserSession, token=token)
+        if (session is not None):
+            session.delete()
+        
+        # Update session
+        session = UserSession(
+            token=token
+        )
 
-        # Return
+        # Get IP
+        session.ip_address = get_client_ip(request)
+
+        # Save
+        session.save()
+
+        # Response Gen
         return Response(
             data={
                 "success": "success",

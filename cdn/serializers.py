@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from cdn.models import File, Person, Share, Tag, VideoDetail
+from cdn.models import Comment, File, Person, Share, Tag, VideoDetail
 
 class TagSerializer(serializers.ModelSerializer):
 	is_person = serializers.SerializerMethodField()
@@ -40,3 +40,8 @@ class DetailedFileSerializer(FileSerializer):
 	class Meta:
 		model = File
 		fields = ["id", "path", "full_name", "title", "description", "tags", "uploaded_by", "video_detail", "comment_count", "like_count"]
+
+class CommentSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Comment
+		fields = ["id", "written_by", "comment"]

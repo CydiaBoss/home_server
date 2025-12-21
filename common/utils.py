@@ -7,6 +7,8 @@ from django.conf import settings
 from django.db.models import Model, Q
 from django.utils._os import safe_join
 
+from rest_framework.request import Request
+
 # Django Model TypeVar
 T = TypeVar("T", bound=Model)
 
@@ -55,3 +57,17 @@ def get_media_types() -> tuple[list[str], list[str]]:
             MEDIA_EXT.append(ext[1:])
 
     return MEDIA_MIMETYPES, MEDIA_EXT
+
+def get_client_ip(request : Request) -> str:
+    """
+    Retrieves the client's IP address from the request object.
+    """
+    # Check if the request went through a proxy or load balancer
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        # The real IP is usually the last one in the list
+        ip = x_forwarded_for.split(',')[-1].strip()
+    else:
+        # Fallback to the direct connection IP
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
