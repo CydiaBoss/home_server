@@ -18,6 +18,9 @@ class Command(BaseCommand):
 
 	# Approved file types
 	file_types = []
+		
+	def add_arguments(self, parser):
+		parser.add_argument("--dir", help="directory to scan within MEDIA_ROOT", default="")
 
 	def handle(self, *args, **options):
 		self.stdout.write('Started scanning the MEDIA_ROOT')
@@ -92,9 +95,17 @@ class Command(BaseCommand):
 
 			# Process Each Entry
 			for info in config[section]["faces"].split(";"):
-				picture.tags.add(person_ids[info.split(",")[1]])
+				# Ignore
+				if info.split(",")[1] not in person_ids:
+					continue
+
+				poi = person_ids[info.split(",")[1]]
+				picture.tags.add(poi)
+				
+				# Add thumbnail if none
+				if (poi.thumbnail is None):
+					poi.thumbnail = picture
+					poi.save()
+					self.stdout.write(self.style.SUCCESS(f'Updated thumbnail on {poi.name} tag'))
 
 		self.stdout.write(self.style.SUCCESS(f'Successfully parsed the config file {ini_file} in directory {root_dir}'))
-		
-	def add_arguments(self, parser):
-		parser.add_argument("--dir", help="directory to scan within MEDIA_ROOT", default="")

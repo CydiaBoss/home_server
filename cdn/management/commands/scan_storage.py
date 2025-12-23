@@ -49,10 +49,11 @@ class Command(BaseCommand):
 				break
 
 			# Item path
-			item_path = f'{dir_name}{item}'
+			item_path = f'{dir_name}/{item}'
 
 			# Recursive for folders
 			if os.path.isdir(item_path):
+				
 				# Create or get Folder Model
 				folder, _ = Folder.objects.get_or_create(
 					parent=parent_folder,
@@ -69,7 +70,7 @@ class Command(BaseCommand):
 				continue
 
 			# Parse File Name
-			parsed_name = re.match(r"^([\w,\s\-\.\(\)]+)?\.([A-Za-z]+)$", item)
+			parsed_name = re.match(r"^([\w,\s\-\.\(\)]+)?\.([A-Za-z0-9]+)$", item)
 
 			# Skip file if fail to parse 
 			if parsed_name is None:
