@@ -25,6 +25,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(_("staff status"), default=False)
     is_active = models.BooleanField(_("active"), default=True)
 
+    @property
+    def full_name(self) -> str:
+        return self.first_name + " " + self.last_name
+
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ('email',)
 
