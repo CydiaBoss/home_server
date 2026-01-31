@@ -7,7 +7,7 @@ from rest_framework.authtoken.models import Token
 from common.utils import get_or_none
 
 from home_user.decorators import staff_only
-from home_user.models import User
+from home_user.models import User, UserSetting
 from home_user.serializers import UserSerializer
 
 class UserView(APIView):
@@ -16,7 +16,7 @@ class UserView(APIView):
 		"""
 		Grabs request user's data
 
-        Route: [GET] /user
+        Route: [GET] /user/data
 		"""
 		return Response({
 			"success": "success",
@@ -29,7 +29,7 @@ class UserView(APIView):
 		Create a new user
 		Only for staff users
 
-        Route: [POST] /user
+        Route: [POST] /user/data
 
         # Request Body
         - first_name: str (first name)
@@ -87,7 +87,7 @@ class UserView(APIView):
 		"""
 		Modify personal user details
 
-        Route: [PUT] /user
+        Route: [PUT] /user/data
 
         # Request Body
 		- email: str (email address)
@@ -98,17 +98,43 @@ class UserView(APIView):
 		- dark_mode: bool (uses dark mode)
 		- lang: str (language to use)
 		"""
-		if "email" in request.data and get_or_none(User, email=request.data.get("email")) is not None:
-			return Response({
-				"success": "fail",
-				"message": "email address already used"
-			}, status=status.HTTP_400_BAD_REQUEST)
+		# Update Email
+		if "email" in request.data: 
+			temp_email = request.data.get("email", request.user.email)
+			if request.user.email != temp_email and get_or_none(User, email=temp_email) is not None:
+				return Response({
+					"success": "fail",
+					"message": "email address already used"
+				}, status=status.HTTP_400_BAD_REQUEST)
+			else:
+				request.user.email = temp_email
+		
+		# Update Names
+		temp_first_name = request.data.get("first_name", request.user.first_name)
+		if request.user.first_name != temp_first_name:
+			request.user.first_name = temp_first_name
+		temp_last_name = request.data.get("last_name", request.user.last_name)
+		if request.user.last_name != temp_last_name:
+			request.user.last_name = temp_last_name
 
-		request.user.email = request.data.get("email", request.user.email)
-		request.user.first_name = request.data.get("first_name", request.user.first_name)
-		request.user.last_name = request.data.get("last_name", request.user.last_name)
-		request.user.bio = request.data.get("bio", request.user.bio)
+		# Update Bio
+		temp_bio = request.data.get("bio", request.user.bio)
+		if request.user.bio != temp_bio:
+			request.user.bio = temp_bio
 
+		# Update user settings
+		if "dark_mode" in request.data or "lang" in request.data:
+			# Make UserSettings if not already
+			user_settings : UserSetting = request.user.settings
+			if user_settings is None:
+				user_settings = UserSetting()
+				user_settings.user = request.user
+
+			user_settings.dark_mode = request.data.get("dark_mode", user_settings.dark_mode)
+			user_settings.lang = request.data.get("lang", user_settings.lang)
+			user_settings.save()
+
+		# Update Password
 		if "password" in request.data:
 			request.user.set_password(request.data.get("password"))
 
